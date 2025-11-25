@@ -59,7 +59,8 @@ function randomColor(alpha=0.7) {
 // ================================
 //  Main Fetch
 // ================================
-fetch("http://127.0.0.1:8000/db/")
+//fetch("http://127.0.0.1:8000/db/")
+fetch("http://10.0.20.22:8000/db/")
     .then(response => response.json())
     .then(data => {
 
