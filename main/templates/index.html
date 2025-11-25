@@ -1,0 +1,38 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COCOAVISION DISKCHART</title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+</head>
+
+<body>
+    <div class="container-fluid d-flex justify-content-center flex-column">
+
+        <!-- /show Summary -->
+        <div id="show-summary" class="summary-box ms-5 mt-3"></div>
+        <div class="chart-container ms-5">
+            <canvas id="show"></canvas>
+        </div>
+
+        <!-- /show2 Summary -->
+        <div id="show2-summary" class="summary-box ms-5 mt-5"></div>
+        <div class="chart-container ms-5">
+            <canvas id="show2"></canvas>
+        </div>
+
+    </div>
+
+    <!-- Chart.js -->
+    <script src="{% static 'chart.umd.js' %}"></script>
+    <!-- Diskchart custom JS -->
+    <script src="{% static 'diskchart.js' %}"></script>
+
+</body>
+</html>
