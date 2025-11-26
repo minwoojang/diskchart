@@ -17,6 +17,8 @@
 }
 
 .main-wrapper {
-    margin: 40px;      /* 위아래좌우 여백 */
-    padding: 20px;     /* 내부 패딩 */
+    padding: 20px;
+    width: 100%;
+    max-width: 1600px;   /* 원하는 경우 최대 폭 설정 */
+    margin: 0 auto;      /* 가운데 정렬 */
 }

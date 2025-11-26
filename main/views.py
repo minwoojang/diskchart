@@ -26,7 +26,7 @@ def df_available_space(path: str) -> int:
     """Return available space (in bytes) for the filesystem that contains path."""
     
     # df -B1 = 1 byte 단위로 출력
-    cmd = ["sudo","df", "-B1", path]
+    cmd = ["sudo","-u","cocoa","-n","df", "-B1", path]
     
     try:
         output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode().splitlines()
@@ -74,7 +74,7 @@ class HashManager:
 
 
 def du_task(path: str):
-    cmd = f"sudo du -xsb {shlex.quote(path)} 2>/dev/null"
+    cmd = f"sudo -u cocoa -n du -xsb {shlex.quote(path)} 2>/dev/null"
     try:
         output = subprocess.check_output(cmd, shell=True).decode().strip()
         return output  # "12345   /show/DEV/assets"
