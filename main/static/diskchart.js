@@ -106,10 +106,10 @@ fetch("http://10.0.20.22:8000/db/")
         //  Summary 표기 (라벨)
         // ================================
         document.getElementById("show-summary").innerText =
-            `TOTAL: ${human(TOTAL_SHOW)}   |   USED: ${human(usedShow)}   |   FREE: ${human(freeShow)}`;
+            `총용량: ${human(TOTAL_SHOW)}   |   사용 용량: ${human(usedShow)}   |   사용 가능: ${human(freeShow)}`;
 
         document.getElementById("show2-summary").innerText =
-            `TOTAL: ${human(TOTAL_SHOW2)}   |   USED: ${human(usedShow2)}   |   FREE: ${human(freeShow2)}`;
+            `총용량: ${human(TOTAL_SHOW2)}   |   사용 용량: ${human(usedShow2)}   |   사용 가능: ${human(freeShow2)}`;
 
 
         // ================================
@@ -122,7 +122,7 @@ fetch("http://10.0.20.22:8000/db/")
             data: {
                 labels: show_labels,
                 datasets: [{
-                    label: 'Used',
+                    label: 'SHOW',
                     data: show_sizes,
                     backgroundColor: show_colors
                 }]
@@ -130,16 +130,29 @@ fetch("http://10.0.20.22:8000/db/")
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                
+                legend: {
+                    onClick: function() { return; },
+                    labels: {
+                        fontSize: 18,
+                        boxWidth: 30
+                    }
+                },
 
                 scales: {
                     yAxes: [{
+                        // ticks: {
+                        //     min: 0,
+                        //     max: TOTAL_SHOW,   // ★ 전체 용량을 Y축 max로 설정
+                        //     callback: function(value) {
+                        //         return human(value);
+                        //     },
+                        //     fontSize: 14
+                        // }
                         ticks: {
-                            min: 0,
-                            max: TOTAL_SHOW,   // ★ 전체 용량을 Y축 max로 설정
-                            callback: function(value) {
-                                return human(value);
-                            },
-                            fontSize: 14
+                            beginAtZero: true,
+                            suggestedMax: Math.max(...show_sizes) * 1.2,  // 최대값의 1.2배
+                            callback: value => human(value)
                         }
                     }],
                     xAxes: [{
@@ -171,7 +184,7 @@ fetch("http://10.0.20.22:8000/db/")
             data: {
                 labels: show2_labels,
                 datasets: [{
-                    label: 'Used',
+                    label: 'SHOW2',
                     data: show2_sizes,
                     backgroundColor: show2_colors
                 }]
@@ -179,16 +192,29 @@ fetch("http://10.0.20.22:8000/db/")
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                
+                legend: {
+                    onClick: function() { return; },
+                    labels: {
+                        fontSize: 18,
+                        boxWidth: 30
+                    }
+                },
 
                 scales: {
                     yAxes: [{
+                        // ticks: {
+                        //     min: 0,
+                        //     max: TOTAL_SHOW2,   // ★ 전체 용량을 Y축 max로 설정
+                        //     callback: function(value) {
+                        //         return human(value);
+                        //     },
+                        //     fontSize: 14
+                        // }
                         ticks: {
-                            min: 0,
-                            max: TOTAL_SHOW2,   // ★ 전체 용량을 Y축 max로 설정
-                            callback: function(value) {
-                                return human(value);
-                            },
-                            fontSize: 14
+                            beginAtZero: true,
+                            suggestedMax: Math.max(...show_sizes) * 1.2,  // 최대값의 1.2배
+                            callback: value => human(value)
                         }
                     }],
                     xAxes: [{
