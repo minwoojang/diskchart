@@ -27,15 +27,11 @@
 // [[Prototype]] : Object
 
 // ================================
-//  설정 영역 (df -h 값 기반 전체 용량)
+//  설정 영역
 // ================================
-const TOTAL_SHOW  = 427 * 1024 * 1024 * 1024 * 1024;   // 427TB
-const TOTAL_SHOW2 = 327 * 1024 * 1024 * 1024 * 1024;   // 327TB
+const TOTAL_SHOW  = 427 * 1024 * 1024 * 1024 * 1024;
+const TOTAL_SHOW2 = 327 * 1024 * 1024 * 1024 * 1024;
 
-
-// ================================
-//  사람 읽기 좋은 용량 변환 함수
-// ================================
 function human(bytes) {
     const units = ['B','KB','MB','GB','TB','PB'];
     if (!bytes || bytes <= 0) return '0 B';
@@ -44,10 +40,6 @@ function human(bytes) {
     return (v >= 10 ? v.toFixed(1) : v.toFixed(2)) + ' ' + units[i];
 }
 
-
-// ================================
-//  랜덤 컬러 생성
-// ================================
 function randomColor(alpha=0.7) {
     const r = Math.floor(Math.random()*255);
     const g = Math.floor(Math.random()*255);
@@ -55,68 +47,48 @@ function randomColor(alpha=0.7) {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-
 // ================================
-//  Main Fetch
+//  FETCH
 // ================================
 fetch("http://10.0.20.22:8000/db/")
-    .then(response => response.json())
+    .then(r => r.json())
     .then(data => {
 
-        // /show 데이터
-        const show_labels = [];
-        const show_sizes = [];
-        const show_colors = [];
-        let usedShow = 0;
+        const show_labels = [], show_sizes = [], show_colors = [];
+        const show2_labels = [], show2_sizes = [], show2_colors = [];
 
-        // /show2 데이터
-        const show2_labels = [];
-        const show2_sizes = [];
-        const show2_colors = [];
-        let usedShow2 = 0;
+        let usedShow = 0, usedShow2 = 0;
 
-
-        // 데이터 분류
-        data.result.forEach(element => {
-            const used = element.size;
+        data.result.forEach(e => {
+            const used = e.size;
             const color = randomColor(0.7);
 
-            if (element.root === "/show") {
+            if (e.root === "/show") {
                 usedShow += used;
-                show_labels.push(element.folder);
+                show_labels.push(e.folder);
                 show_sizes.push(used);
                 show_colors.push(color);
-
-            } else if (element.root === "/show2") {
+            } else if (e.root === "/show2") {
                 usedShow2 += used;
-                show2_labels.push(element.folder);
+                show2_labels.push(e.folder);
                 show2_sizes.push(used);
                 show2_colors.push(color);
             }
         });
 
-
-        // 남은 용량 계산
-        const freeShow = TOTAL_SHOW - usedShow;
-        const freeShow2 = TOTAL_SHOW2 - usedShow2;
-
-
         // ================================
-        //  Summary 표기
+        //  Summary 출력
         // ================================
         document.getElementById("show-summary").innerText =
-            `총용량: ${human(TOTAL_SHOW)}   |   사용 용량: ${human(usedShow)}   |   사용 가능: ${human(freeShow)}`;
+            `총용량: ${human(TOTAL_SHOW)} | 사용: ${human(usedShow)} | 남음: ${human(TOTAL_SHOW - usedShow)}`;
 
         document.getElementById("show2-summary").innerText =
-            `총용량: ${human(TOTAL_SHOW2)}   |   사용 용량: ${human(usedShow2)}   |   사용 가능: ${human(freeShow2)}`;
-
-
+            `총용량: ${human(TOTAL_SHOW2)} | 사용: ${human(usedShow2)} | 남음: ${human(TOTAL_SHOW2 - usedShow2)}`;
 
         // ================================
-        //  /show 차트
-        // ================================
+        //  SHOW CHART (v2)
+// ================================
         const ctx = document.getElementById('show').getContext('2d');
-        const maxShow = Math.max(...show_sizes);
 
         if (window.showChart) window.showChart.destroy();
 
@@ -135,10 +107,10 @@ fetch("http://10.0.20.22:8000/db/")
                 maintainAspectRatio: false,
 
                 legend: {
-                    onClick: function() {},   // ★ 클릭 무효화
+                    onClick: function() {},      // ★ 클릭 무효
                     labels: {
-                        fontSize: 18,
-                        boxWidth: 30
+                        fontSize: 18,           // ★ 글자 크기 적용
+                        boxWidth: 30            // ★ 네모 크기 적용
                     }
                 },
 
@@ -146,38 +118,30 @@ fetch("http://10.0.20.22:8000/db/")
                     yAxes: [{
                         ticks: {
                             beginAtZero: true,
-                            suggestedMax: maxShow * 1.2,  // ★ show 기준
-                            callback: function(value) {
-                                return human(value);
-                            },
-                            fontSize: 14
+                            suggestedMax: Math.max(...show_sizes) * 1.2,  // ★ show 기준
+                            callback: function(v){ return human(v); }
                         }
                     }],
                     xAxes: [{
                         ticks: {
-                            fontSize: 14,
-                            autoSkip: false
+                            autoSkip: false,
+                            fontSize: 14
                         }
                     }]
                 },
 
                 tooltips: {
                     callbacks: {
-                        label: function(tooltipItem) {
-                            return "Used: " + human(tooltipItem.yLabel);
-                        }
+                        label: function(t){ return "Used: " + human(t.yLabel); }
                     }
                 }
             }
         });
 
-
-
         // ================================
-        //  /show2 차트
-        // ================================
+        //  SHOW2 CHART (v2)
+// ================================
         const ctx1 = document.getElementById('show2').getContext('2d');
-        const maxShow2 = Math.max(...show2_sizes);
 
         if (window.show2Chart) window.show2Chart.destroy();
 
@@ -196,7 +160,7 @@ fetch("http://10.0.20.22:8000/db/")
                 maintainAspectRatio: false,
 
                 legend: {
-                    onClick: function() {},   // ★ 클릭 무효화
+                    onClick: function() {},      // ★ 클릭 무효
                     labels: {
                         fontSize: 18,
                         boxWidth: 30
@@ -207,26 +171,21 @@ fetch("http://10.0.20.22:8000/db/")
                     yAxes: [{
                         ticks: {
                             beginAtZero: true,
-                            suggestedMax: maxShow2 * 1.2,  // ★ show2 기준
-                            callback: function(value) {
-                                return human(value);
-                            },
-                            fontSize: 14
+                            suggestedMax: Math.max(...show2_sizes) * 1.2,   // ★ show2 기준
+                            callback: function(v){ return human(v); }
                         }
                     }],
                     xAxes: [{
                         ticks: {
-                            fontSize: 14,
-                            autoSkip: false
+                            autoSkip: false,
+                            fontSize: 14
                         }
                     }]
                 },
 
                 tooltips: {
                     callbacks: {
-                        label: function(tooltipItem) {
-                            return "Used: " + human(tooltipItem.yLabel);
-                        }
+                        label: function(t){ return "Used: " + human(t.yLabel); }
                     }
                 }
             }
