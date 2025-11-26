@@ -3,6 +3,8 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, HttpRequest, HttpResponseBase
+from django.utils import timezone
+from datetime import datetime, timedelta
 from .models import DiskUsage
 import hashlib
 import pathlib
@@ -84,10 +86,26 @@ class Db(View):
     def get(self, request: HttpRequest) -> HttpResponse:
         if request.method != "GET":
             return JsonResponse({"error": "GET only"}, status=405)
-        content = DiskUsage.objects.all().values()   
-        result = {"result": list(content)}           
-        return JsonResponse(result, safe=False) 
 
+        # 오늘 날짜
+        today = timezone.now().date()
+
+        # 오늘 00:00
+        today_start = timezone.make_aware(
+            datetime.combine(today, datetime.min.time())
+        )
+
+        # 내일 00:00
+        tomorrow_start = today_start + timedelta(days=1)
+
+        # 오늘 하루치 데이터만
+        content = DiskUsage.objects.filter(
+            created_at__gte=today_start,
+            created_at__lt=tomorrow_start,
+        ).values()
+
+        result = {"result": list(content)}
+        return JsonResponse(result, safe=False)
 
 @method_decorator(csrf_exempt, name='dispatch')
 class Du(View):
