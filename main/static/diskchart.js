@@ -1,5 +1,3 @@
-
-
 // RESPONSE: 
 // {result: Array(19)}
 // result : Array(19)
@@ -106,42 +104,48 @@ fetch("http://10.0.20.22:8000/db/")
         //  Summary 표기 (라벨)
         // ================================
         document.getElementById("show-summary").innerText =
-            `TOTAL: ${human(TOTAL_SHOW)}   |   USED: ${human(usedShow)}   |   FREE: ${human(freeShow)}`;
+            `총 용량: ${human(TOTAL_SHOW)}   |   사용용량 : ${human(usedShow)}   |   남은용량: ${human(freeShow)}`;
 
         document.getElementById("show2-summary").innerText =
-            `TOTAL: ${human(TOTAL_SHOW2)}   |   USED: ${human(usedShow2)}   |   FREE: ${human(freeShow2)}`;
+            `총 용량: ${human(TOTAL_SHOW2)}   |   사용 용량: ${human(usedShow2)}   |   남은용량: ${human(freeShow2)}`;
 
 
         // ================================
         //  /show 차트
         // ================================
         const ctx = document.getElementById('show').getContext('2d');
+        const maxShow = Math.max(...show_sizes) * 1.15;
 
         new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: show_labels,
                 datasets: [{
-                    label: 'Used',
+                    label: 'SHOW',
                     data: show_sizes,
-                    backgroundColor: show_colors
+                    backgroundColor: show_colors,
+		    minBarLength: 5
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
 
+		legend: {
+	            onClick: function(event) {
+	                return;
+	            }
+	        },
+
                 scales: {
-                    yAxes: [{
-                        ticks: {
-                            min: 0,
-                            max: TOTAL_SHOW,   // ★ 전체 용량을 Y축 max로 설정
-                            callback: function(value) {
-                                return human(value);
-                            },
-                            fontSize: 14
-                        }
-                    }],
+		    yAxes: [{
+    			ticks: {
+        		    beginAtZero: true,
+        		    callback: function(value) {
+            			return human(value);
+        		    }
+    			}
+		    }],
                     xAxes: [{
                         ticks: {
                             fontSize: 14,
@@ -171,27 +175,32 @@ fetch("http://10.0.20.22:8000/db/")
             data: {
                 labels: show2_labels,
                 datasets: [{
-                    label: 'Used',
+                    label: 'SHOW2',
                     data: show2_sizes,
-                    backgroundColor: show2_colors
+                    backgroundColor: show2_colors,
+		    minBarLength: 5
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
 
+                legend: {
+                    onClick: function(event) {
+                        return;   
+                    }
+                },
+
                 scales: {
                     yAxes: [{
                         ticks: {
-                            min: 0,
-                            max: TOTAL_SHOW2,   // ★ 전체 용량을 Y축 max로 설정
+                            beginAtZero: true,
                             callback: function(value) {
                                 return human(value);
-                            },
-                            fontSize: 14
+                            }
                         }
                     }],
-                    xAxes: [{
+		    Axes: [{
                         ticks: {
                             fontSize: 14,
                             autoSkip: false
