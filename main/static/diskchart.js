@@ -27,11 +27,15 @@
 // [[Prototype]] : Object
 
 // ================================
-//  설정 영역
+//  설정 영역 (df -h 값 기반 전체 용량)
 // ================================
-const TOTAL_SHOW  = 427 * 1024 * 1024 * 1024 * 1024;
-const TOTAL_SHOW2 = 327 * 1024 * 1024 * 1024 * 1024;
+const TOTAL_SHOW  = 427 * 1024 * 1024 * 1024 * 1024;   // 427TB
+const TOTAL_SHOW2 = 327 * 1024 * 1024 * 1024 * 1024;   // 327TB
 
+
+// ================================
+//  사람 읽기 좋은 용량 변환 함수
+// ================================
 function human(bytes) {
     const units = ['B','KB','MB','GB','TB','PB'];
     if (!bytes || bytes <= 0) return '0 B';
@@ -40,6 +44,10 @@ function human(bytes) {
     return (v >= 10 ? v.toFixed(1) : v.toFixed(2)) + ' ' + units[i];
 }
 
+
+// ================================
+//  랜덤 컬러 생성
+// ================================
 function randomColor(alpha=0.7) {
     const r = Math.floor(Math.random()*255);
     const g = Math.floor(Math.random()*255);
@@ -47,57 +55,74 @@ function randomColor(alpha=0.7) {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+
 // ================================
-//  FETCH
+//  Main Fetch
 // ================================
+//fetch("http://127.0.0.1:8000/db/")
 fetch("http://10.0.20.22:8000/db/")
-    .then(r => r.json())
+    .then(response => response.json())
     .then(data => {
 
-        const show_labels = [], show_sizes = [], show_colors = [];
-        const show2_labels = [], show2_sizes = [], show2_colors = [];
+        // /show 데이터
+        const show_labels = [];
+        const show_sizes = [];
+        const show_colors = [];
+        let usedShow = 0;
 
-        let usedShow = 0, usedShow2 = 0;
+        // /show2 데이터
+        const show2_labels = [];
+        const show2_sizes = [];
+        const show2_colors = [];
+        let usedShow2 = 0;
 
-        data.result.forEach(e => {
-            const used = e.size;
+
+        // 데이터 분류
+        data.result.forEach(element => {
+            const used = element.size;
             const color = randomColor(0.7);
 
-            if (e.root === "/show") {
+            if (element.root === "/show") {
                 usedShow += used;
-                show_labels.push(e.folder);
+                show_labels.push(element.folder);
                 show_sizes.push(used);
                 show_colors.push(color);
-            } else if (e.root === "/show2") {
+
+            } else if (element.root === "/show2") {
                 usedShow2 += used;
-                show2_labels.push(e.folder);
+                show2_labels.push(element.folder);
                 show2_sizes.push(used);
                 show2_colors.push(color);
             }
         });
 
+
+        // 남은 용량 계산
+        const freeShow = TOTAL_SHOW - usedShow;
+        const freeShow2 = TOTAL_SHOW2 - usedShow2;
+
+
         // ================================
-        //  Summary 출력
+        //  Summary 표기 (라벨)
         // ================================
         document.getElementById("show-summary").innerText =
-            `총용량: ${human(TOTAL_SHOW)} | 사용: ${human(usedShow)} | 남음: ${human(TOTAL_SHOW - usedShow)}`;
+            `TOTAL: ${human(TOTAL_SHOW)}   |   USED: ${human(usedShow)}   |   FREE: ${human(freeShow)}`;
 
         document.getElementById("show2-summary").innerText =
-            `총용량: ${human(TOTAL_SHOW2)} | 사용: ${human(usedShow2)} | 남음: ${human(TOTAL_SHOW2 - usedShow2)}`;
+            `TOTAL: ${human(TOTAL_SHOW2)}   |   USED: ${human(usedShow2)}   |   FREE: ${human(freeShow2)}`;
+
 
         // ================================
-        //  SHOW CHART (v2)
-// ================================
+        //  /show 차트
+        // ================================
         const ctx = document.getElementById('show').getContext('2d');
 
-        if (window.showChart) window.showChart.destroy();
-
-        window.showChart = new Chart(ctx, {
+        new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: show_labels,
                 datasets: [{
-                    label: 'SHOW',
+                    label: 'Used',
                     data: show_sizes,
                     backgroundColor: show_colors
                 }]
@@ -106,51 +131,47 @@ fetch("http://10.0.20.22:8000/db/")
                 responsive: true,
                 maintainAspectRatio: false,
 
-                legend: {
-                    onClick: function() {},      // ★ 클릭 무효
-                    labels: {
-                        fontSize: 18,           // ★ 글자 크기 적용
-                        boxWidth: 30            // ★ 네모 크기 적용
-                    }
-                },
-
                 scales: {
                     yAxes: [{
                         ticks: {
-                            beginAtZero: true,
-                            suggestedMax: Math.max(...show_sizes) * 1.2,  // ★ show 기준
-                            callback: function(v){ return human(v); }
+                            min: 0,
+                            max: TOTAL_SHOW,   // ★ 전체 용량을 Y축 max로 설정
+                            callback: function(value) {
+                                return human(value);
+                            },
+                            fontSize: 14
                         }
                     }],
                     xAxes: [{
                         ticks: {
-                            autoSkip: false,
-                            fontSize: 14
+                            fontSize: 14,
+                            autoSkip: false
                         }
                     }]
                 },
 
                 tooltips: {
                     callbacks: {
-                        label: function(t){ return "Used: " + human(t.yLabel); }
+                        label: function(tooltipItem, data) {
+                            return "Used: " + human(tooltipItem.yLabel);
+                        }
                     }
                 }
             }
         });
 
+
         // ================================
-        //  SHOW2 CHART (v2)
-// ================================
+        //  /show2 차트
+        // ================================
         const ctx1 = document.getElementById('show2').getContext('2d');
 
-        if (window.show2Chart) window.show2Chart.destroy();
-
-        window.show2Chart = new Chart(ctx1, {
+        new Chart(ctx1, {
             type: 'bar',
             data: {
                 labels: show2_labels,
                 datasets: [{
-                    label: 'SHOW2',
+                    label: 'Used',
                     data: show2_sizes,
                     backgroundColor: show2_colors
                 }]
@@ -159,33 +180,30 @@ fetch("http://10.0.20.22:8000/db/")
                 responsive: true,
                 maintainAspectRatio: false,
 
-                legend: {
-                    onClick: function() {},      // ★ 클릭 무효
-                    labels: {
-                        fontSize: 18,
-                        boxWidth: 30
-                    }
-                },
-
                 scales: {
                     yAxes: [{
                         ticks: {
-                            beginAtZero: true,
-                            suggestedMax: Math.max(...show2_sizes) * 1.2,   // ★ show2 기준
-                            callback: function(v){ return human(v); }
+                            min: 0,
+                            max: TOTAL_SHOW2,   // ★ 전체 용량을 Y축 max로 설정
+                            callback: function(value) {
+                                return human(value);
+                            },
+                            fontSize: 14
                         }
                     }],
                     xAxes: [{
                         ticks: {
-                            autoSkip: false,
-                            fontSize: 14
+                            fontSize: 14,
+                            autoSkip: false
                         }
                     }]
                 },
 
                 tooltips: {
                     callbacks: {
-                        label: function(t){ return "Used: " + human(t.yLabel); }
+                        label: function(tooltipItem, data) {
+                            return "Used: " + human(tooltipItem.yLabel);
+                        }
                     }
                 }
             }
