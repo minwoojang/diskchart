@@ -83,29 +83,17 @@ def du_task(path: str):
         return None
     
 class Db(View):
-    def get(self, request: HttpRequest) -> HttpResponse:
+    def get(self, request):
         if request.method != "GET":
             return JsonResponse({"error": "GET only"}, status=405)
 
-        # 오늘 날짜
-        today = timezone.now().date()
+        today = timezone.localdate()  # KST 기준 오늘 날짜
 
-        # 오늘 00:00
-        today_start = timezone.make_aware(
-            datetime.combine(today, datetime.min.time())
-        )
-
-        # 내일 00:00
-        tomorrow_start = today_start + timedelta(days=1)
-
-        # 오늘 하루치 데이터만
         content = DiskUsage.objects.filter(
-            created_at__gte=today_start,
-            created_at__lt=tomorrow_start,
+            created_at__date=today
         ).values()
 
-        result = {"result": list(content)}
-        return JsonResponse(result, safe=False)
+        return JsonResponse({"result": list(content)}, safe=False)
 
 @method_decorator(csrf_exempt, name='dispatch')
 class Du(View):
