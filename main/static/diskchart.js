@@ -59,7 +59,6 @@ function randomColor(alpha=0.7) {
 // ================================
 //  Main Fetch
 // ================================
-//fetch("http://127.0.0.1:8000/db/")
 fetch("http://10.0.20.22:8000/db/")
     .then(response => response.json())
     .then(data => {
@@ -103,7 +102,7 @@ fetch("http://10.0.20.22:8000/db/")
 
 
         // ================================
-        //  Summary 표기 (라벨)
+        //  Summary 표기
         // ================================
         document.getElementById("show-summary").innerText =
             `총용량: ${human(TOTAL_SHOW)}   |   사용 용량: ${human(usedShow)}   |   사용 가능: ${human(freeShow)}`;
@@ -112,12 +111,16 @@ fetch("http://10.0.20.22:8000/db/")
             `총용량: ${human(TOTAL_SHOW2)}   |   사용 용량: ${human(usedShow2)}   |   사용 가능: ${human(freeShow2)}`;
 
 
+
         // ================================
         //  /show 차트
         // ================================
         const ctx = document.getElementById('show').getContext('2d');
+        const maxShow = Math.max(...show_sizes);
 
-        new Chart(ctx, {
+        if (window.showChart) window.showChart.destroy();
+
+        window.showChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: show_labels,
@@ -130,9 +133,9 @@ fetch("http://10.0.20.22:8000/db/")
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                
+
                 legend: {
-                    onClick: function() { return; },
+                    onClick: function() {},   // ★ 클릭 무효화
                     labels: {
                         fontSize: 18,
                         boxWidth: 30
@@ -141,18 +144,13 @@ fetch("http://10.0.20.22:8000/db/")
 
                 scales: {
                     yAxes: [{
-                        // ticks: {
-                        //     min: 0,
-                        //     max: TOTAL_SHOW,   // ★ 전체 용량을 Y축 max로 설정
-                        //     callback: function(value) {
-                        //         return human(value);
-                        //     },
-                        //     fontSize: 14
-                        // }
                         ticks: {
                             beginAtZero: true,
-                            suggestedMax: Math.max(...show_sizes) * 1.2,  // 최대값의 1.2배
-                            callback: value => human(value)
+                            suggestedMax: maxShow * 1.2,  // ★ show 기준
+                            callback: function(value) {
+                                return human(value);
+                            },
+                            fontSize: 14
                         }
                     }],
                     xAxes: [{
@@ -165,7 +163,7 @@ fetch("http://10.0.20.22:8000/db/")
 
                 tooltips: {
                     callbacks: {
-                        label: function(tooltipItem, data) {
+                        label: function(tooltipItem) {
                             return "Used: " + human(tooltipItem.yLabel);
                         }
                     }
@@ -174,12 +172,16 @@ fetch("http://10.0.20.22:8000/db/")
         });
 
 
+
         // ================================
         //  /show2 차트
         // ================================
         const ctx1 = document.getElementById('show2').getContext('2d');
+        const maxShow2 = Math.max(...show2_sizes);
 
-        new Chart(ctx1, {
+        if (window.show2Chart) window.show2Chart.destroy();
+
+        window.show2Chart = new Chart(ctx1, {
             type: 'bar',
             data: {
                 labels: show2_labels,
@@ -192,9 +194,9 @@ fetch("http://10.0.20.22:8000/db/")
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                
+
                 legend: {
-                    onClick: function() { return; },
+                    onClick: function() {},   // ★ 클릭 무효화
                     labels: {
                         fontSize: 18,
                         boxWidth: 30
@@ -203,18 +205,13 @@ fetch("http://10.0.20.22:8000/db/")
 
                 scales: {
                     yAxes: [{
-                        // ticks: {
-                        //     min: 0,
-                        //     max: TOTAL_SHOW2,   // ★ 전체 용량을 Y축 max로 설정
-                        //     callback: function(value) {
-                        //         return human(value);
-                        //     },
-                        //     fontSize: 14
-                        // }
                         ticks: {
                             beginAtZero: true,
-                            suggestedMax: Math.max(...show_sizes) * 1.2,  // 최대값의 1.2배
-                            callback: value => human(value)
+                            suggestedMax: maxShow2 * 1.2,  // ★ show2 기준
+                            callback: function(value) {
+                                return human(value);
+                            },
+                            fontSize: 14
                         }
                     }],
                     xAxes: [{
@@ -227,7 +224,7 @@ fetch("http://10.0.20.22:8000/db/")
 
                 tooltips: {
                     callbacks: {
-                        label: function(tooltipItem, data) {
+                        label: function(tooltipItem) {
                             return "Used: " + human(tooltipItem.yLabel);
                         }
                     }
