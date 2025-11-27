@@ -100,6 +100,8 @@ fetch("/db/")
         const freeShow = TOTAL_SHOW - usedShow;
         const freeShow2 = TOTAL_SHOW2 - usedShow2;
 
+	// 현재 날짜 계산
+	let today = new Date();
 
         // ================================
         //  Summary 표기 (라벨)
@@ -110,6 +112,7 @@ fetch("/db/")
         document.getElementById("show2-summary").innerText =
             `총 용량: ${human(TOTAL_SHOW2)}   |   사용 용량: ${human(usedShow2)}   |   남은용량: ${human(freeShow2)}`;
 
+	document.querySelector(".date").innerText = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
 
         // ================================
         //  /show 차트
