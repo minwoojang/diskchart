@@ -46,7 +46,7 @@
 
 ### 2) Systemd 서비스 설정
 `/etc/systemd/system/diskchart.service`
-```ini
+
 [Unit]
 Description=Diskchart Django Server (runserver, root-based)
 After=network.target
