@@ -79,6 +79,7 @@ systemctl status diskchart
 
 ## 프로젝트 구조
 
+```ini
 diskchart/
 ├── config/
 ├── main/
@@ -89,6 +90,7 @@ diskchart/
 ├── templates/
 │   └── index.html
 └── manage.py
+```
 
 ## 사용 방법
 systemctl start diskchart
